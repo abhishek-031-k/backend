@@ -41,13 +41,13 @@ const UserSchema = new mongoose.Schema({
       required: [true, 'Password is required']
      },
      refreshToken: {
-        type: string
+        type: String
      }
 }, {timestamps: true})
 
 UserSchema.pre("save", async function (next) {
    if(!this.isModified("password"))return next();
-    this.password = bcrypt.hash(this.password, 10)
+    this.password = await bcrypt.hash(this.password, 10)
     next()
 })
 
