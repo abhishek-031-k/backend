@@ -1,50 +1,22 @@
-import dotenv from "dotenv"
-import connectDB from "./db/index.js";
-import app from "./app.js"
+import dotenv from "dotenv";
 
 dotenv.config({
-    path: './.env'
-})
+    path: "./.env"
+});
+
+console.log("INDEX CLOUD:", process.env.CLOUDINARY_CLOUD_NAME);
+console.log("INDEX KEY:", process.env.CLOUDINARY_API_KEY);
+console.log("INDEX SECRET:", process.env.CLOUDINARY_API_SECRET);
+
+import connectDB from "./db/index.js";
+import app from "./app.js";
 
 connectDB()
-.then(()=>{
-    app.listen(process.env.PORT || 8000, ()=>{
-        console.log(`server is running at port :${process.env.PORT}`);
-        
-    })
+.then(() => {
+    app.listen(process.env.PORT || 8000, () => {
+        console.log(`server is running at port : ${process.env.PORT}`);
+    });
 })
-.catch((err)=>{
+.catch((err) => {
     console.log("mongo db connection failed!!!", err);
-    
-})
-
-
-
-
-
-
-
-
-/*
-import express from "express"
-const app = express()
-
-( async() => {
-    try{
-await mongoose.connect(`${process.env.MONGODB_URI}/${
-    DB_NAME}`)
-    app.on("error", (error)=>{
-        console.log("ERROR: ", error);
-        throw error
-    })
-    app.listen(process.env.PORT, ()=>{
-        console.log(`app is listening on port ${process.env.PORT}`);
-    })
-    }
-    catch(error){
-        console.log("ERROR: " ,error);
-        throw err
-        
-    }
-})()
-    */
+});
