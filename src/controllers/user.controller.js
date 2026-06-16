@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken"
 
 
+
 const generateAcessAndRefreshTokens = async(userId)=>{
   try{
     const user = await User.findById(userId)
@@ -200,7 +201,10 @@ const changeCurrentPassword = asyncHandler(async(req, res)=>{
 const getCurrentUser = asyncHandler(async(req, res)=>{
   return res
   .status(200)
-  .json(200, req.user, "current user fetch successfully")
+  .json(new ApiResponse(
+    200,
+     req.user,
+      "current user fetch successfully"))
 })
 
 const updateAccountDetails = asyncHandler(async(req, res)=>{
@@ -227,6 +231,10 @@ const updateUserAvatar = asyncHandler(async(req, res)=>{
 
   if(!avatarLocalPath)throw new ApiError(400, "Avatar file is missing")
 
+   const currentuser = await User.findById(req.user?._id)
+   const oldAvatar = currentuser?.avatar
+
+
   const avatar = await uploadonCloudinary(avatarLocalPath)
   if(!avatar.url)throw new ApiError(400, "Error while uploading on avatar")
    const user = await User.findByIdAndUpdate(
@@ -237,9 +245,18 @@ const updateUserAvatar = asyncHandler(async(req, res)=>{
 {new: true}
 ).select("-password")
 
+if(oldAvatar){
+  const publicId = oldAvatar
+  .split("/")
+  .pop()
+  .split(".")[0]
+
+  await uploadonCloudinary.uploader.destroy(publicId)
+}
+
 
 res
-.satus(200)
+.status(200)
 .json(
   new ApiResponse(200, user, "avatarImage updated successfully"))
 
@@ -262,7 +279,7 @@ const updateUserCoverImage = asyncHandler(async(req, res)=>{
 ).select("-password")
 
 res
-.satus(200)
+.status(200)
 .json(
   new ApiResponse(200, user, "CoverImage updated successfully"))
 
