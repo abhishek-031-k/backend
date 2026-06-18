@@ -285,6 +285,19 @@ res
 
 })
 
+const getUserChannerlProfile = asyncHandler(async(req, res)=>{
+ const {useranme} = req.params
+ if(!username?.trim())throw new ApiError(400, "username is missing")
+
+  const Channnel = await User.aggregate([
+    {
+      $match: {
+        username: username?.toLowerCase()
+      }
+    }
+  ])
+})
+
 export {
   registerUser,
   loginUser,
@@ -294,5 +307,6 @@ export {
       getCurrentUser,
       updateAccountDetails,
       updateUserAvatar,
-      updateUserCoverImage
+      updateUserCoverImage,
+      getUserChannerlProfile
     }
