@@ -50,17 +50,49 @@ const publishAVideo = asyncHandler(async (req, res) => {
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: get video by id
+    if(!mongoose.Types.ObjectId.isValid(videoId))throw new ApiError(400, "invalid video id")
+    
+    const video = await Video.find(videoId)
+    if(!video)throw new ApiError(404, "video not found")
+       res
+      .status(200)
+      .json(new ApiResponse(200, video, "video fetched successfully")) 
 })
 
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: update video details like title, description, thumbnail
+    if(!mongoose.Types.ObjectId.isValid(videoId))throw new ApiError(401, "video is not present")
+
+    const video = await Video.findById(videoId)
+    if(!video)throw new ApiError(404, "video not found") 
+        
+    if(video.owner.toString() !== req.user._id.toString())throw new ApiError(403, "unauthorized")
+
+    const {title, description} = req.body
+    if(!title && !description && !req.file)throw new ApiError(400, "one field must be required")
+
+    const thumbnailpath = req.file?.path
+
+    if(!thumbnail)throw new ApiError(401, "thumbnail upload failed")
+    const thumbnail = await uploadOnCloudinary(thumbnailpath)
+        video.thumbnail = thumbnail.url
+      
+     if(title)video.title = title;
+     if(description)video.description = description
+     await video.save({validateBeforSave: false})
+
+     const updatedVideo = await Video.findById(videoId)
+     
+     return res
+     .status(200)
+     .json(new ApiResponse(200, updatedVideo, "video updated successfully"))
+   
 
 })
 
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: delete video
+    
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
