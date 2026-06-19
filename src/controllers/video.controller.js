@@ -5,7 +5,7 @@ import {ApiError} from "../utils/ApiError.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
-
+import { v2 } from "cloudinary"
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
@@ -92,6 +92,33 @@ const updateVideo = asyncHandler(async (req, res) => {
 
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+    if(!mongoose.Types.ObjectId.isValid(videoId))throw new ApiError(400, "video already not present")
+    
+    const video = await Video.findById(videoId)
+    if(!video)throw new ApiError(404, "video not present")
+    if(video.owner.toString() !== req.user._id.toString())throw new ApiError(403, "unauthorized access")
+
+   const getPublicId = (url)=>{
+    const parts = url.split("/")
+    const fileName = parts.pop().split(".")[0]
+        return fileName
+   }
+
+   const thumbnailpublicId = getPublicId(video.thumbnail)
+   await Cloudinary.uploader.destroy(thumbnailpublicId)
+
+   const videopublicId = getPublicId(video.videoFile)
+   await  Cloudinary.uploader.destroy(videopublicId,
+    {resource_type: "video"
+
+    }
+   )
+   await video.deleteOne();
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "video deleted successfully"))
+
     
 })
 
