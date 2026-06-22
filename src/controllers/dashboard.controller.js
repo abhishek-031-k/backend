@@ -74,7 +74,7 @@ const getChannelVideos = asyncHandler(async (req, res) => {
     const channelId = req.user._id
     const videos = await Video.find({owner: channelId})
 
-    res
+   return  res
     .status(200)
     .json(new ApiResponse(200, {videos}, "all videos fetched successfully"))
 })

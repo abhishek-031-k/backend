@@ -52,7 +52,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     //TODO: get video by id
     if(!mongoose.Types.ObjectId.isValid(videoId))throw new ApiError(400, "invalid video id")
     
-    const video = await Video.find(videoId)
+    const video = await Video.findById(videoId)
     if(!video)throw new ApiError(404, "video not found")
        res
       .status(200)
@@ -73,13 +73,13 @@ const updateVideo = asyncHandler(async (req, res) => {
 
     const thumbnailpath = req.file?.path
 
-    if(!thumbnail)throw new ApiError(401, "thumbnail upload failed")
     const thumbnail = await uploadOnCloudinary(thumbnailpath)
+if(!thumbnail)throw new ApiError(401, "thumbnail upload failed")
         video.thumbnail = thumbnail.url
       
      if(title)video.title = title;
      if(description)video.description = description
-     await video.save({validateBeforSave: false})
+    await video.save({ validateBeforeSave: false })
 
      const updatedVideo = await Video.findById(videoId)
      
@@ -105,10 +105,10 @@ const deleteVideo = asyncHandler(async (req, res) => {
    }
 
    const thumbnailpublicId = getPublicId(video.thumbnail)
-   await Cloudinary.uploader.destroy(thumbnailpublicId)
+   await v2.uploader.destroy(thumbnailpublicId)
 
    const videopublicId = getPublicId(video.videoFile)
-   await  Cloudinary.uploader.destroy(videopublicId,
+   await  v2.uploader.destroy(videopublicId,
     {resource_type: "video"
 
     }
@@ -127,7 +127,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     if(!mongoose.Types.ObjectId.isValid(videoId))throw new ApiError(400, "invalid video id")
 
     const video = await Video.findById(videoId)
-    if(!video)throw new ApiError(404, "video not found")
+    if(!video)throw new ApiError(401, "video not found")
 
     if(video.owner.toString() !== req.user._id.toString())throw new ApiError(403, "unauthorized access")
     
