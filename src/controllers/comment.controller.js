@@ -32,7 +32,7 @@ const addComment = asyncHandler(async (req, res) => {
 })
 
 const updateComment = asyncHandler(async (req, res) => {
-    // TODO: update a comment
+    // update comment
     const {commentId} = req.params
     const {content} = req.body
     if(!mongoose.Types.ObjectId.isValid(commentId))throw new ApiError(400, "invalid Id")
